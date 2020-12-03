@@ -1,0 +1,14 @@
+{
+    "header": "[Header]",
+    "categories": [
+        {
+            "name": "Unknown",
+            "links": [
+                {
+                    "url": "https://szyma.dev",
+                    "name": "Home"
+                }
+            ]
+        }
+    ]
+}

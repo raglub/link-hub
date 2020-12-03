@@ -1,9 +1,18 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
 const isDevelopment = process.env.NODE_ENV !== 'production'
+
+const fs = require('fs');
+const path = require('path');
+
+ipcMain.handle('get-data', async (event, ...args) => {
+  let rawdata = fs.readFileSync('data.json');
+  let data = JSON.parse(rawdata);
+  return data
+})
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
@@ -18,8 +27,9 @@ async function createWindow () {
     webPreferences: {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
-      nodeIntegration: (process.env
-        .ELECTRON_NODE_INTEGRATION as unknown) as boolean
+      nodeIntegration: true
+      // (process.env
+      //  .ELECTRON_NODE_INTEGRATION as unknown) as boolean
     }
   })
 
