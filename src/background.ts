@@ -7,7 +7,6 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 
 const fs = require('fs');
 const path = require('path');
-
 ipcMain.handle('get-data', async (event, ...args) => {
   let rawdata = fs.readFileSync('data.json');
   let data = JSON.parse(rawdata);
@@ -19,7 +18,7 @@ protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
 
-async function createWindow () {
+async function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
@@ -28,8 +27,8 @@ async function createWindow () {
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: true
-      // (process.env
-      //  .ELECTRON_NODE_INTEGRATION as unknown) as boolean
+      //(process.env
+      //    .ELECTRON_NODE_INTEGRATION as unknown) as boolean
     }
   })
 
