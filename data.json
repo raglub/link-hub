@@ -9,6 +9,19 @@
                     "name": "Home"
                 }
             ]
+        },
+        {
+            "name": "Next",
+            "links": [
+                {
+                    "url": "https://szyma.dev",
+                    "name": "Dev"
+                },
+                {
+                    "url": "https://szyma.dev",
+                    "name": "Web"
+                }
+            ]
         }
     ]
 }
