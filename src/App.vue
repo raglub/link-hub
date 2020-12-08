@@ -1,8 +1,20 @@
 <template>
   <div id="app">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-    <router-view/>
+    <b-navbar toggleable="sm" type="dark" variant="dark" fixed="top">
+      <b-navbar-brand href="#">LinkHub</b-navbar-brand>
+
+      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+
+      <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav>
+          <b-nav-item to="/">Home</b-nav-item>
+          <b-nav-item to="/about">About</b-nav-item>
+        </b-navbar-nav>
+      </b-collapse>
+    </b-navbar>
+    <div class="container mt-4 pt-4">
+      <router-view/>
+    </div>
   </div>
 </template>
 
