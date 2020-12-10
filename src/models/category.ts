@@ -1,7 +1,11 @@
 import Link from './link'
 
 export default class Category {
-    public name = ''
+  public name = 'LinkHub'
 
-    public links: Link[] = []
+  public links: Link[] = []
+
+  constructor (name = '') {
+    this.name = name
+  }
 }

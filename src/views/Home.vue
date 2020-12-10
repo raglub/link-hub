@@ -47,7 +47,7 @@ export default class Home extends Vue {
 
   async mounted () {
     const data = await ipcRenderer.invoke('get-data')
-    this.$data.categories = data.categories
+    this.categories = data.categories
   }
 
   openLink (url: string) {
@@ -59,11 +59,13 @@ export default class Home extends Vue {
     this.linkCreateRequest.category = category
   }
 
-  createLink (response: LinkCreateResponse) {
+  async createLink (response: LinkCreateResponse) {
     const link = new Link()
     link.name = response.name
     link.url = response.url
-    response.category.links.push(link)
+    const data = await ipcRenderer.invoke('create-link', response.category.name, link)
+    this.categories.length = 0
+    this.categories.push(...data.categories)
   }
 }
 </script>
