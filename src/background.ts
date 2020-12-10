@@ -3,13 +3,31 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-const isDevelopment = process.env.NODE_ENV !== 'production'
-
+import Link from './models/link'
+import Category from './models/category'
+import Data from './models/data'
 const fs = require('fs');
 const path = require('path');
+const isDevelopment = process.env.NODE_ENV !== 'production'
+
+const dataPath = 'data.json'
+let data: Data = new Data();
+
+if (fs.existsSync(dataPath)) {
+  const rawdata = fs.readFileSync(dataPath);
+  data = JSON.parse(rawdata);
+}
+
 ipcMain.handle('get-data', async (event, ...args) => {
-  let rawdata = fs.readFileSync('data.json');
-  let data = JSON.parse(rawdata);
+  return data
+})
+
+ipcMain.handle('create-link', async (event, categoryId: string, link: Link) => {
+  const category = data.categories.find(category => category.name === categoryId)
+  if (category) {
+    category.links.push(link)
+  }
+  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
   return data
 })
 
