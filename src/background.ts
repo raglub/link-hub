@@ -3,33 +3,10 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import Link from './models/link'
-import Category from './models/category'
-import Data from './models/data'
-const fs = require('fs');
-const path = require('path');
+import Api from './utils/api'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-const dataPath = 'data.json'
-let data: Data = new Data();
-
-if (fs.existsSync(dataPath)) {
-  const rawdata = fs.readFileSync(dataPath);
-  data = JSON.parse(rawdata);
-}
-
-ipcMain.handle('get-data', async (event, ...args) => {
-  return data
-})
-
-ipcMain.handle('create-link', async (event, categoryId: string, link: Link) => {
-  const category = data.categories.find(category => category.name === categoryId)
-  if (category) {
-    category.links.push(link)
-  }
-  fs.writeFileSync('data.json', JSON.stringify(data, null, 2));
-  return data
-})
+Api.register()
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
