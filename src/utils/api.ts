@@ -32,5 +32,19 @@ export default class Api {
             fs.writeFileSync(Api.dataPath, JSON.stringify(Api.data, null, 2));
             return Api.data
         })
+
+        ipcMain.handle('edit-link', async (event, link: Link) => {
+            const linkId = link.id
+            const category = Api.data.categories.find(category => category.links.find(link => link.id === linkId))
+            if (category) {
+                const categoryLink = category.links.find(link => link.id === linkId)
+                if (categoryLink) {
+                    categoryLink.name = link.name
+                    categoryLink.url = link.url
+                }
+            }
+            fs.writeFileSync(Api.dataPath, JSON.stringify(Api.data, null, 2));
+            return Api.data
+        })
     }
 }
