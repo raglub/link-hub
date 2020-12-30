@@ -25,7 +25,7 @@
                 <template #button-content>
                   <b-icon icon="three-dots-vertical" class="m-0 p-0"></b-icon>
                 </template>
-                <b-dropdown-item @click="showLinkEdit(category, link.url)"><b-icon icon="pencil"></b-icon> Edit link</b-dropdown-item>
+                <b-dropdown-item @click="showLinkEdit(link)"><b-icon icon="pencil"></b-icon> Edit link</b-dropdown-item>
               </b-dropdown>
             </div>
           </div>
@@ -44,6 +44,7 @@ import LinkCreate from '@/components/LinkCreate.vue'
 import LinkEdit from '@/components/LinkEdit.vue'
 import Link from '@/models/link'
 import LinkCreateRequest from '@/models/link-create-request'
+import LinkEditRequest from '@/models/link-edit-request'
 import LinkCreateResponse from '@/models/link-create-response'
 
 const { ipcRenderer, shell } = window.require('electron')
@@ -57,11 +58,16 @@ const { ipcRenderer, shell } = window.require('electron')
 export default class Home extends Vue {
   private categories: Category[] = [];
   private linkCreateRequest = new LinkCreateRequest()
-  private linkEditRequest = new LinkCreateRequest()
+  private linkEditRequest = new LinkEditRequest()
 
   async mounted () {
+    await this.loadData()
+  }
+
+  private async loadData () {
     const data = await ipcRenderer.invoke('get-data')
-    this.categories = data.categories
+    this.categories.length = 0
+    this.categories.push(...data.categories)
   }
 
   openLink (url: string) {
@@ -73,9 +79,11 @@ export default class Home extends Vue {
     this.linkCreateRequest.category = category
   }
 
-  showLinkEdit (category: Category, id: string) {
+  showLinkEdit (link: Link) {
     this.linkEditRequest.isVisible = true
-    this.linkEditRequest.category = category
+    this.linkEditRequest.url = link.url
+    this.linkEditRequest.name = link.name
+    this.linkEditRequest.id = link.id
   }
 
   async createLink (response: LinkCreateResponse) {
@@ -83,11 +91,12 @@ export default class Home extends Vue {
     link.name = response.name
     link.url = response.url
     const data = await ipcRenderer.invoke('create-link', response.category.name, link)
-    this.categories.length = 0
-    this.categories.push(...data.categories)
+    await this.loadData()
   }
 
   async editLink (response: LinkCreateResponse) {
+    await ipcRenderer.invoke('edit-link', response)
+    await this.loadData()
   }
 }
 </script>

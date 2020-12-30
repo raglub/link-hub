@@ -17,7 +17,7 @@
         >
           <b-form-input
             id="name-input"
-            v-model="name"
+            v-model="payload.name"
             :state="nameState"
             required
           ></b-form-input>
@@ -30,7 +30,7 @@
         >
           <b-form-input
             id="url-input"
-            v-model="url"
+            v-model="payload.url"
             :state="urlState"
             required
           ></b-form-input>
@@ -41,17 +41,15 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import LinkCreateRequest from '@/models/link-create-request'
-import LinkCreateResponse from '@/models/link-create-response'
+import LinkEditRequest from '@/models/link-edit-request'
+import LinkEditResponse from '@/models/link-edit-response'
 import Link from '@/models/link'
 
 @Component
 export default class CreateLink extends Vue {
     @Prop()
-    private payload!: LinkCreateRequest
+    private payload!: LinkEditRequest
 
-    name = ''
-    url = ''
     nameState = null
     urlState = null
     submittedNames: string[] = []
@@ -63,8 +61,6 @@ export default class CreateLink extends Vue {
     }
 
     resetModal () {
-      this.name = ''
-      this.url = ''
       this.nameState = null
     }
 
@@ -79,10 +75,10 @@ export default class CreateLink extends Vue {
       if (!this.checkFormValidity()) {
         return
       }
-      const response = new LinkCreateResponse()
-      response.name = this.name
-      response.url = this.url
-      response.category = this.payload.category
+      const response = new LinkEditResponse()
+      response.name = this.payload.name
+      response.url = this.payload.url
+      response.id = this.payload.id
       this.$emit('clickSubmit', response)
       this.payload.isVisible = false
     }
