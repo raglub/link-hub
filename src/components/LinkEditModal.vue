@@ -41,46 +41,47 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
-import LinkEditRequest from '@/models/link-edit-request'
-import LinkEditResponse from '@/models/link-edit-response'
+import LinkEdit from '@/models/link-edit'
 import Link from '@/models/link'
+import ModalBase from '@/models/modal-base'
 
 @Component
-export default class CreateLink extends Vue {
-    @Prop()
-    private payload!: LinkEditRequest
+export default class LinkEditModal extends Vue {
+  @Prop()
+  private payload!: LinkEdit & ModalBase
 
-    nameState = null
-    urlState = null
-    submittedNames: string[] = []
+  nameState = null
+  urlState = null
+  submittedNames: string[] = []
 
-    checkFormValidity () {
-      // const valid = this.$refs.form.checkValidity()
-      // this.nameState = valid
-      return true
+  checkFormValidity () {
+    // const valid = this.$refs.form.checkValidity()
+    // this.nameState = valid
+    return true
+  }
+
+  resetModal () {
+    this.nameState = null
+  }
+
+  handleOk (bvModalEvt: any) {
+    // Prevent modal from closing
+    bvModalEvt.preventDefault()
+    // Trigger submit handler
+    this.onSubmit()
+  }
+
+  onSubmit () {
+    if (!this.checkFormValidity()) {
+      return
     }
-
-    resetModal () {
-      this.nameState = null
+    const response: LinkEdit = {
+      name: this.payload.name,
+      url: this.payload.url,
+      id: this.payload.id
     }
-
-    handleOk (bvModalEvt: any) {
-      // Prevent modal from closing
-      bvModalEvt.preventDefault()
-      // Trigger submit handler
-      this.onSubmit()
-    }
-
-    onSubmit () {
-      if (!this.checkFormValidity()) {
-        return
-      }
-      const response = new LinkEditResponse()
-      response.name = this.payload.name
-      response.url = this.payload.url
-      response.id = this.payload.id
-      this.$emit('clickSubmit', response)
-      this.payload.isVisible = false
-    }
+    this.$emit('clickSubmit', response)
+    this.payload.isVisible = false
+  }
 }
 </script>

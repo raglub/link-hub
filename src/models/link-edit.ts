@@ -1,7 +1,6 @@
 import Category from './category'
 
-export default class LinkEditRequest {
-    isVisible = false
+export default class LinkEdit {
     name = ''
     url = ''
     id = ''

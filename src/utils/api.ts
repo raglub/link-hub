@@ -4,6 +4,8 @@ import { ipcMain } from 'electron';
 import Link from '@/models/link'
 import Category from '@/models/category'
 import { v4 as uuidv4 } from 'uuid';
+import LinkEdit from '@/models/link-edit';
+import CategoryCreate from '@/models/category-create';
 
 const fs = require('fs');
 const path = require('path');
@@ -33,7 +35,15 @@ export default class Api {
             return Api.data
         })
 
-        ipcMain.handle('edit-link', async (event, link: Link) => {
+        ipcMain.handle('create-category', async (event, categoryCreate: CategoryCreate) => {
+            const category = new Category()
+            category.name = categoryCreate.name
+            Api.data.categories.push(category)
+            fs.writeFileSync(Api.dataPath, JSON.stringify(Api.data, null, 2));
+            return Api.data
+        })
+
+        ipcMain.handle('edit-link', async (event, link: LinkEdit) => {
             const linkId = link.id
             const category = Api.data.categories.find(category => category.links.find(link => link.id === linkId))
             if (category) {
