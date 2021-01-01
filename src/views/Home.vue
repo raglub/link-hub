@@ -1,11 +1,12 @@
 <template>
   <div class="home">
+    <b-button variant="primary" class="mb-2" @click="showCategoryCreate()"><b-icon icon="plus-circle"></b-icon> Add Category</b-button>
     <b-card-group class="text-left" deck>
       <b-card v-for="category in categories" :key="category.name" header-tag="header">
         <template #header>
           <h6 class="mt-2 float-left">{{ category.name }}</h6>
           <div class="float-right">
-            <b-dropdown size="sm"  variant="link" toggle-class="text-decoration-none" no-caret>
+            <b-dropdown size="sm" right variant="link" toggle-class="text-decoration-none" no-caret>
               <template #button-content>
                 <b-icon icon="three-dots-vertical"></b-icon>
               </template>
@@ -21,7 +22,7 @@
               <a class="float-leftt" style="cursor: pointer;" @click="openLink(link.url)" target="_blank">{{ link.name }}</a>
             </div>
             <div class="bd-highlight">
-              <b-dropdown size="sm"  variant="link" toggle-class="text-decoration-none" no-caret>
+              <b-dropdown size="sm" right variant="link" toggle-class="text-decoration-none" no-caret>
                 <template #button-content>
                   <b-icon icon="three-dots-vertical" class="m-0 p-0"></b-icon>
                 </template>
@@ -32,8 +33,9 @@
         </b-card-text>
       </b-card>
     </b-card-group>
+    <category-create-modal :payload="categoryCreate" @clickSubmit="createCategory"></category-create-modal>
     <link-create :payload="linkCreateRequest" @clickSubmit="createLink"></link-create>
-    <link-edit :payload="linkEditRequest" @clickSubmit="editLink"></link-edit>
+    <link-edit-modal :payload="linkEdit" @clickSubmit="editLink"></link-edit-modal>
   </div>
 </template>
 
@@ -41,24 +43,37 @@
 import { Component, Prop, Vue, Model } from 'vue-property-decorator'
 import Category from '@/models/category'
 import LinkCreate from '@/components/LinkCreate.vue'
-import LinkEdit from '@/components/LinkEdit.vue'
+import LinkEditModal from '@/components/LinkEditModal.vue'
+import CategoryCreateModal from '@/components/CategoryCreateModal.vue'
 import Link from '@/models/link'
 import LinkCreateRequest from '@/models/link-create-request'
-import LinkEditRequest from '@/models/link-edit-request'
+import LinkEdit from '@/models/link-edit'
 import LinkCreateResponse from '@/models/link-create-response'
+import ModalBase from '@/models/modal-base'
+import CategoryCreate from '@/models/category-create'
 
 const { ipcRenderer, shell } = window.require('electron')
 
 @Component({
   components: {
     LinkCreate,
-    LinkEdit
+    LinkEditModal,
+    CategoryCreateModal
   }
 })
 export default class Home extends Vue {
   private categories: Category[] = [];
   private linkCreateRequest = new LinkCreateRequest()
-  private linkEditRequest = new LinkEditRequest()
+  private linkEdit: LinkEdit & ModalBase = {
+    name: '',
+    id: '',
+    url: '',
+    isVisible: false
+  }
+
+  private categoryCreate: ModalBase = {
+    isVisible: false
+  }
 
   async mounted () {
     await this.loadData()
@@ -79,11 +94,15 @@ export default class Home extends Vue {
     this.linkCreateRequest.category = category
   }
 
+  showCategoryCreate () {
+    this.categoryCreate.isVisible = true
+  }
+
   showLinkEdit (link: Link) {
-    this.linkEditRequest.isVisible = true
-    this.linkEditRequest.url = link.url
-    this.linkEditRequest.name = link.name
-    this.linkEditRequest.id = link.id
+    this.linkEdit.isVisible = true
+    this.linkEdit.url = link.url
+    this.linkEdit.name = link.name
+    this.linkEdit.id = link.id
   }
 
   async createLink (response: LinkCreateResponse) {
@@ -94,7 +113,12 @@ export default class Home extends Vue {
     await this.loadData()
   }
 
-  async editLink (response: LinkCreateResponse) {
+  async createCategory (response: CategoryCreate) {
+    const data = await ipcRenderer.invoke('create-category', response)
+    await this.loadData()
+  }
+
+  async editLink (response: LinkEdit) {
     await ipcRenderer.invoke('edit-link', response)
     await this.loadData()
   }
