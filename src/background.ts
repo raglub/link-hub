@@ -3,10 +3,10 @@
 import { app, protocol, BrowserWindow, ipcMain } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS_DEVTOOLS } from 'electron-devtools-installer'
-import Api from './utils/api'
+import Ipc from './utils/ipc'
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
-Api.register()
+Ipc.register()
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([
