@@ -6,6 +6,8 @@ import Category from '@/models/category'
 import { v4 as uuidv4 } from 'uuid';
 import LinkEdit from '@/models/link-edit';
 import CategoryCreate from '@/models/category-create';
+import CategoryEdit from '@/models/category-edit';
+import { IpcChannel } from './ipc-channel';
 
 const fs = require('fs');
 const path = require('path');
@@ -21,11 +23,11 @@ export default class Api {
             Api.data = JSON.parse(rawdata);
         }
 
-        ipcMain.handle('get-data', async (event, ...args) => {
+        ipcMain.handle(IpcChannel.getData, async (event) => {
             return Api.data
         })
 
-        ipcMain.handle('create-link', async (event, categoryId: string, link: Link) => {
+        ipcMain.handle(IpcChannel.createLink, async (event, categoryId: string, link: Link) => {
             const category = Api.data.categories.find(category => category.name === categoryId)
             if (category) {
                 link.id = uuidv4()
@@ -38,6 +40,7 @@ export default class Api {
         ipcMain.handle('create-category', async (event, categoryCreate: CategoryCreate) => {
             const category = new Category()
             category.name = categoryCreate.name
+            category.id = uuidv4()
             Api.data.categories.push(category)
             fs.writeFileSync(Api.dataPath, JSON.stringify(Api.data, null, 2));
             return Api.data
@@ -52,6 +55,15 @@ export default class Api {
                     categoryLink.name = link.name
                     categoryLink.url = link.url
                 }
+            }
+            fs.writeFileSync(Api.dataPath, JSON.stringify(Api.data, null, 2));
+            return Api.data
+        })
+
+        ipcMain.handle('edit-category', async (event, categoryEdit: CategoryEdit) => {
+            const category = Api.data.categories.find(category => category.id === categoryEdit.id)
+            if (category) {
+                category.name = categoryEdit.name
             }
             fs.writeFileSync(Api.dataPath, JSON.stringify(Api.data, null, 2));
             return Api.data

@@ -10,7 +10,7 @@
               <template #button-content>
                 <b-icon icon="three-dots-vertical"></b-icon>
               </template>
-              <b-dropdown-item href="#"><b-icon icon="pencil"></b-icon> Edit</b-dropdown-item>
+              <b-dropdown-item @click="showCategoryEdit(category)"><b-icon icon="pencil"></b-icon> Edit</b-dropdown-item>
               <b-dropdown-item @click="showLinkCreate(category)"><b-icon icon="plus-circle"></b-icon> Add link</b-dropdown-item>
             </b-dropdown>
           </div>
@@ -34,6 +34,7 @@
       </b-card>
     </b-card-group>
     <category-create-modal :payload="categoryCreate" @clickSubmit="createCategory"></category-create-modal>
+    <category-edit-modal :payload="categoryEdit" @clickSubmit="editCategory"></category-edit-modal>
     <link-create :payload="linkCreateRequest" @clickSubmit="createLink"></link-create>
     <link-edit-modal :payload="linkEdit" @clickSubmit="editLink"></link-edit-modal>
   </div>
@@ -45,12 +46,15 @@ import Category from '@/models/category'
 import LinkCreate from '@/components/LinkCreate.vue'
 import LinkEditModal from '@/components/LinkEditModal.vue'
 import CategoryCreateModal from '@/components/CategoryCreateModal.vue'
+import CategoryEditModal from '@/components/CategoryEditModal.vue'
 import Link from '@/models/link'
 import LinkCreateRequest from '@/models/link-create-request'
 import LinkEdit from '@/models/link-edit'
 import LinkCreateResponse from '@/models/link-create-response'
 import ModalBase from '@/models/modal-base'
 import CategoryCreate from '@/models/category-create'
+import CategoryEdit from '@/models/category-edit'
+import { IpcChannel } from '@/utils/ipc-channel'
 
 const { ipcRenderer, shell } = window.require('electron')
 
@@ -58,7 +62,8 @@ const { ipcRenderer, shell } = window.require('electron')
   components: {
     LinkCreate,
     LinkEditModal,
-    CategoryCreateModal
+    CategoryCreateModal,
+    CategoryEditModal
   }
 })
 export default class Home extends Vue {
@@ -71,6 +76,12 @@ export default class Home extends Vue {
     isVisible: false
   }
 
+  private categoryEdit: CategoryEdit & ModalBase = {
+    name: '',
+    id: '',
+    isVisible: false
+  }
+
   private categoryCreate: ModalBase = {
     isVisible: false
   }
@@ -80,7 +91,7 @@ export default class Home extends Vue {
   }
 
   private async loadData () {
-    const data = await ipcRenderer.invoke('get-data')
+    const data = await ipcRenderer.invoke(IpcChannel.getData)
     this.categories.length = 0
     this.categories.push(...data.categories)
   }
@@ -98,6 +109,12 @@ export default class Home extends Vue {
     this.categoryCreate.isVisible = true
   }
 
+  showCategoryEdit (category: Category) {
+    this.categoryEdit.isVisible = true
+    this.categoryEdit.name = category.name
+    this.categoryEdit.id = category.id
+  }
+
   showLinkEdit (link: Link) {
     this.linkEdit.isVisible = true
     this.linkEdit.url = link.url
@@ -109,12 +126,17 @@ export default class Home extends Vue {
     const link = new Link()
     link.name = response.name
     link.url = response.url
-    const data = await ipcRenderer.invoke('create-link', response.category.name, link)
+    const data = await ipcRenderer.invoke(IpcChannel.createLink, response.category.name, link)
     await this.loadData()
   }
 
   async createCategory (response: CategoryCreate) {
     const data = await ipcRenderer.invoke('create-category', response)
+    await this.loadData()
+  }
+
+  async editCategory (response: CategoryEdit) {
+    const data = await ipcRenderer.invoke('edit-category', response)
     await this.loadData()
   }
 
