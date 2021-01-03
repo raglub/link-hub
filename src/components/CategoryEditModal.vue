@@ -2,7 +2,7 @@
     <b-modal
       id="modal-prevent-closing"
       ref="modal"
-      title="Create category"
+      title="Edit category"
       v-model="payload.isVisible"
       @show="resetModal"
       @hidden="resetModal"
@@ -17,7 +17,7 @@
         >
           <b-form-input
             id="name-input"
-            v-model="name"
+            v-model="payload.name"
             :state="nameState"
             required
           ></b-form-input>
@@ -29,15 +29,14 @@
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import ModalBase from '@/models/modal-base'
-import CategoryCreate from '@/models/category-create'
+import CategoryEdit from '@/models/category-edit'
 
 @Component
-export default class CategoryCreateModal extends Vue {
+export default class CategoryEditModal extends Vue {
     @Prop()
-    private payload!: ModalBase
+    private payload!: CategoryEdit & ModalBase
 
     nameState = null
-    name = ''
 
     checkFormValidity () {
       // const valid = this.$refs.form.checkValidity()
@@ -46,7 +45,6 @@ export default class CategoryCreateModal extends Vue {
     }
 
     resetModal () {
-      this.name = ''
       this.nameState = null
     }
 
@@ -61,9 +59,10 @@ export default class CategoryCreateModal extends Vue {
       if (!this.checkFormValidity()) {
         return
       }
-      const categoryCreate = new CategoryCreate()
-      categoryCreate.name = this.name
-      this.$emit('clickSubmit', categoryCreate)
+      const categoryEdit = new CategoryEdit()
+      categoryEdit.name = this.payload.name
+      categoryEdit.id = this.payload.id
+      this.$emit('clickSubmit', categoryEdit)
       this.payload.isVisible = false
     }
 }
