@@ -1,6 +1,18 @@
 <template>
   <div class="home">
-    <b-button variant="primary" class="mb-2" @click="showCategoryCreate()"><b-icon icon="plus-circle"></b-icon> Add Category</b-button>
+    <b-row>
+      <b-col><h2 class="float-left">Links</h2></b-col>
+      <b-col>
+        <div class="float-right">
+          <b-dropdown size="sm" right variant="link" toggle-class="text-decoration-none" no-caret>
+            <template #button-content>
+              <b-icon icon="three-dots-vertical"></b-icon>
+            </template>
+            <b-dropdown-item @click="showCategoryCreate()"><b-icon icon="plus-circle"></b-icon> Add Category</b-dropdown-item>
+          </b-dropdown>
+        </div>
+      </b-col>
+    </b-row>
     <b-card-group class="text-left" deck>
       <b-card v-for="category in categories" :key="category.name" header-tag="header">
         <template #header>
@@ -10,8 +22,9 @@
               <template #button-content>
                 <b-icon icon="three-dots-vertical"></b-icon>
               </template>
-              <b-dropdown-item @click="showCategoryEdit(category)"><b-icon icon="pencil"></b-icon> Edit</b-dropdown-item>
               <b-dropdown-item @click="showLinkCreate(category)"><b-icon icon="plus-circle"></b-icon> Add link</b-dropdown-item>
+              <b-dropdown-item @click="showDeleteCategory(category.id)"><b-icon icon="trash"></b-icon> Delete category</b-dropdown-item>
+              <b-dropdown-item @click="showCategoryEdit(category)"><b-icon icon="pencil"></b-icon> Edit category</b-dropdown-item>
             </b-dropdown>
           </div>
         </template>
@@ -55,6 +68,7 @@ import ModalBase from '@/models/modal-base'
 import CategoryCreate from '@/models/category-create'
 import CategoryEdit from '@/models/category-edit'
 import { IpcChannel } from '@/utils/ipc-channel'
+import typedIpcRenderer from '@/utils/typed-ipc-renderer'
 
 const { ipcRenderer, shell } = window.require('electron')
 
@@ -91,7 +105,7 @@ export default class Home extends Vue {
   }
 
   private async loadData () {
-    const data = await ipcRenderer.invoke(IpcChannel.getData)
+    const data = await typedIpcRenderer.invoke(IpcChannel.fetchData)
     this.categories.length = 0
     this.categories.push(...data.categories)
   }
@@ -122,11 +136,31 @@ export default class Home extends Vue {
     this.linkEdit.id = link.id
   }
 
+  showDeleteCategory (categoryId: string) {
+    this.$bvModal.msgBoxConfirm('Please confirm that you want to delete category.', {
+      title: 'Please Confirm',
+      size: 'sm',
+      buttonSize: 'sm',
+      okVariant: 'danger',
+      okTitle: 'Yes',
+      cancelTitle: 'No',
+      footerClass: 'p-2',
+      hideHeaderClose: false,
+      centered: true
+    }).then(value => {
+      if (value) {
+        this.deleteCategory(categoryId)
+      }
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
   async createLink (response: LinkCreateResponse) {
     const link = new Link()
     link.name = response.name
     link.url = response.url
-    const data = await ipcRenderer.invoke(IpcChannel.createLink, response.category.name, link)
+    const data = await typedIpcRenderer.invoke(IpcChannel.createLink, response.category.id, link)
     await this.loadData()
   }
 
@@ -137,6 +171,11 @@ export default class Home extends Vue {
 
   async editCategory (response: CategoryEdit) {
     const data = await ipcRenderer.invoke('edit-category', response)
+    await this.loadData()
+  }
+
+  async deleteCategory (categoryId: string) {
+    await typedIpcRenderer.invoke(IpcChannel.deleteCategory, categoryId)
     await this.loadData()
   }
 

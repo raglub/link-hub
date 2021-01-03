@@ -1,5 +1,8 @@
 export enum IpcChannel {
     createLink = 'createLink',
     editLink = 'editLink',
-    getData = 'getData'
+    fetchData = 'fetchData',
+    deleteCategory = 'deleteCategory',
+    createCategory = 'createCategory',
+    editCategory = 'editCategory'
 }
