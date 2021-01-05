@@ -11,9 +11,11 @@ import { IpcChannel } from './ipc-channel';
 import { TypedIpcMain, TypedIpcRenderer, TypedWebContents } from 'electron-typed-ipc';
 import { IpcCommands } from './ipc-commands';
 import { IpcEvents } from './ipc-events';
+import PackageExctract from '@/models/package-exctract';
 
 const fs = require('fs');
 const path = require('path');
+const packageExtract = require('../../package.json') as PackageExctract
 
 const typedIpcMain = ipcMain as TypedIpcMain<IpcEvents, IpcCommands>;
 
@@ -30,6 +32,10 @@ export default class Ipc {
 
         typedIpcMain.handle(IpcChannel.fetchData, async (event) => {
             return Ipc.data
+        })
+
+        typedIpcMain.handle(IpcChannel.fetchPackage, async (event) => {
+            return packageExtract
         })
 
         typedIpcMain.handle(IpcChannel.createLink, async (event: any, categoryId: string, link: Link) => {
