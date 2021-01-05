@@ -4,7 +4,7 @@ module.exports = {
             builderOptions: {
                 appId: "dev.szyma.link-hub",
                 productName: 'Link Hub',
-                copyright: "Copyright © 2020 ${author}",
+                copyright: "Copyright © 2021 ${author}",
                 publish: {
                     provider: "github",
                     owner: "raglub",
