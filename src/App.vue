@@ -12,7 +12,7 @@
         </b-navbar-nav>
       </b-collapse>
     </b-navbar>
-    <div class="container mt-4 pt-4">
+    <div class="container-fluid mt-4 pt-4">
       <router-view/>
     </div>
   </div>
