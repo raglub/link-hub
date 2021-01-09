@@ -96,7 +96,7 @@ export default class Ipc {
 			fs.writeFileSync(Ipc.dataPath, JSON.stringify(Ipc.data, null, 2));
 		})
 
-		ipcMain.handle('create-category', async (event, categoryCreate: CategoryCreate) => {
+		ipcMain.handle(IpcChannel.createCategory, async (event, categoryCreate: CategoryCreate) => {
 			const category = new Category()
 			category.name = categoryCreate.name
 			category.id = uuidv4()
@@ -105,7 +105,7 @@ export default class Ipc {
 			return Ipc.data
 		})
 
-		ipcMain.handle('edit-link', async (event, link: LinkEdit) => {
+		ipcMain.handle(IpcChannel.editLink, async (event, link: LinkEdit) => {
 			const linkId = link.id
 			const category = Ipc.data.categories.find(category => category.links.find(link => link.id === linkId))
 			if (category) {
@@ -119,7 +119,7 @@ export default class Ipc {
 			return Ipc.data
 		})
 
-		ipcMain.handle('edit-category', async (event, categoryEdit: CategoryEdit) => {
+		ipcMain.handle(IpcChannel.editCategory, async (event, categoryEdit: CategoryEdit) => {
 			const category = Ipc.data.categories.find(category => category.id === categoryEdit.id)
 			if (category) {
 				category.name = categoryEdit.name

@@ -69,8 +69,7 @@ import CategoryCreate from '@/models/category-create'
 import CategoryEdit from '@/models/category-edit'
 import { IpcChannel } from '@/utils/ipc-channel'
 import typedIpcRenderer from '@/utils/typed-ipc-renderer'
-
-const { ipcRenderer, shell } = window.require('electron')
+// const { shell } = window.require('electron')
 
 @Component({
   components: {
@@ -111,7 +110,7 @@ export default class Home extends Vue {
   }
 
   openLink (url: string) {
-    shell.openExternal(url)
+    // shell.openExternal(url)
   }
 
   showLinkCreate (category: Category) {
@@ -165,12 +164,12 @@ export default class Home extends Vue {
   }
 
   async createCategory (response: CategoryCreate) {
-    const data = await ipcRenderer.invoke('create-category', response)
+    const data = await typedIpcRenderer.invoke(IpcChannel.createCategory, response)
     await this.loadData()
   }
 
   async editCategory (response: CategoryEdit) {
-    const data = await ipcRenderer.invoke('edit-category', response)
+    const data = await typedIpcRenderer.invoke(IpcChannel.editCategory, response)
     await this.loadData()
   }
 
@@ -180,7 +179,7 @@ export default class Home extends Vue {
   }
 
   async editLink (response: LinkEdit) {
-    await ipcRenderer.invoke('edit-link', response)
+    await typedIpcRenderer.invoke(IpcChannel.editLink, response)
     await this.loadData()
   }
 }
