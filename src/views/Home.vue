@@ -40,6 +40,7 @@
                   <b-icon icon="three-dots-vertical" class="m-0 p-0"></b-icon>
                 </template>
                 <b-dropdown-item @click="showLinkEdit(link)"><b-icon icon="pencil"></b-icon> Edit link</b-dropdown-item>
+                <b-dropdown-item @click="showDeleteLink(link.id)"><b-icon icon="trash"></b-icon> Delete link</b-dropdown-item>
               </b-dropdown>
             </div>
           </div>
@@ -69,7 +70,6 @@ import CategoryCreate from '@/models/category-create'
 import CategoryEdit from '@/models/category-edit'
 import { IpcChannel } from '@/utils/ipc-channel'
 import typedIpcRenderer from '@/utils/typed-ipc-renderer'
-// const { shell } = window.require('electron')
 
 @Component({
   components: {
@@ -109,8 +109,8 @@ export default class Home extends Vue {
     this.categories.push(...data.categories)
   }
 
-  openLink (url: string) {
-    // shell.openExternal(url)
+  async openLink (url: string) {
+    await typedIpcRenderer.invoke(IpcChannel.openUrl, url)
   }
 
   showLinkCreate (category: Category) {
@@ -155,6 +155,26 @@ export default class Home extends Vue {
     })
   }
 
+  showDeleteLink (linkId: string) {
+    this.$bvModal.msgBoxConfirm('Please confirm that you want to delete link.', {
+      title: 'Please Confirm',
+      size: 'sm',
+      buttonSize: 'sm',
+      okVariant: 'danger',
+      okTitle: 'Yes',
+      cancelTitle: 'No',
+      footerClass: 'p-2',
+      hideHeaderClose: false,
+      centered: true
+    }).then(value => {
+      if (value) {
+        this.deleteLink(linkId)
+      }
+    }).catch(err => {
+      console.error(err)
+    })
+  }
+
   async createLink (response: LinkCreateResponse) {
     const link = new Link()
     link.name = response.name
@@ -175,6 +195,11 @@ export default class Home extends Vue {
 
   async deleteCategory (categoryId: string) {
     await typedIpcRenderer.invoke(IpcChannel.deleteCategory, categoryId)
+    await this.loadData()
+  }
+
+  async deleteLink (linkId: string) {
+    await typedIpcRenderer.invoke(IpcChannel.deleteLink, linkId)
     await this.loadData()
   }
 
