@@ -14,7 +14,9 @@ import { IpcEvents } from './ipc-events';
 import PackageExctract from '@/models/package-exctract';
 import SettingsModel from '@/models/settingsModel';
 import settings from 'electron-settings';
+import IpcResponse from './ipc-response';
 
+const { shell } = require('electron')
 const fs = require('fs');
 const path = require('path');
 const packageExtract = require('../../package.json') as PackageExctract
@@ -96,6 +98,22 @@ export default class Ipc {
 			fs.writeFileSync(Ipc.dataPath, JSON.stringify(Ipc.data, null, 2));
 		})
 
+		typedIpcMain.handle(IpcChannel.deleteLink, async (event: any, linkId: string) => {
+			const response = new IpcResponse<boolean>()
+			response.response = false
+			try {
+				const category = Ipc.data.categories.find(category => category.links.find(link => link.id === linkId))
+				if (category) {
+					category.links = category.links.filter(link => link.id !== linkId)
+					fs.writeFileSync(Ipc.dataPath, JSON.stringify(Ipc.data, null, 2));
+					response.response = true
+				}
+			} catch (err) {
+				response.error = err	
+			}
+			return response
+		})
+
 		ipcMain.handle(IpcChannel.createCategory, async (event, categoryCreate: CategoryCreate) => {
 			const category = new Category()
 			category.name = categoryCreate.name
@@ -117,6 +135,10 @@ export default class Ipc {
 			}
 			fs.writeFileSync(Ipc.dataPath, JSON.stringify(Ipc.data, null, 2));
 			return Ipc.data
+		})
+
+		ipcMain.handle(IpcChannel.openUrl, async (event, url: string) => {
+			shell.openExternal(url)
 		})
 
 		ipcMain.handle(IpcChannel.editCategory, async (event, categoryEdit: CategoryEdit) => {

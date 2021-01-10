@@ -11,8 +11,10 @@ const isDevelopment = process.env.NODE_ENV !== 'production'
 protocol.registerSchemesAsPrivileged([
   { scheme: 'app', privileges: { secure: true, standard: true } }
 ])
+declare let __static: any;
 
 async function createWindow() {
+  const preload = path.resolve(__static, 'preload.js')
   // Create the browser window.
   const win = new BrowserWindow({
     width: 800,
@@ -25,7 +27,7 @@ async function createWindow() {
       nodeIntegration: false,
       // contextIsolation: true, // protect against prototype pollution
       enableRemoteModule: false,
-      preload: path.join(__dirname, "/../src/preload.js")
+      preload
     }
   })
 
